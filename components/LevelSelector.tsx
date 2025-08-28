@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Level, UserProgress } from '../types';
 import Icon from './Icon';
@@ -22,18 +21,30 @@ const LevelSelector: React.FC<LevelSelectorProps> = ({ levels, userProgress, cur
             const isCurrent = level.id === currentLevelId;
             const isUnlocked = index === 0 || userProgress[index - 1]?.completed;
 
-            let statusClasses = 'bg-white text-gray-700 hover:bg-gray-100';
-            let statusIcon = <Icon name="code" className="h-5 w-5 text-gray-400" />;
+            let statusClasses: string;
+            let statusIcon: React.ReactNode;
 
             if (!isUnlocked) {
               statusClasses = 'bg-gray-100 text-gray-400 cursor-not-allowed';
               statusIcon = <Icon name="lock" className="h-5 w-5" />;
-            } else if (isCurrent) {
-              statusClasses = 'bg-blue-600 text-white shadow-sm';
-              statusIcon = <Icon name="code" className="h-5 w-5" />;
-            } else if (isCompleted) {
-              statusClasses = 'bg-green-100 text-green-800 hover:bg-green-200';
-              statusIcon = <Icon name="check" className="h-5 w-5 text-green-600" />;
+            } else {
+              // Set classes based on current/completed status
+              if (isCurrent) {
+                statusClasses = 'bg-blue-600 text-white shadow-sm';
+              } else if (isCompleted) {
+                statusClasses = 'bg-green-100 text-green-800 hover:bg-green-200';
+              } else {
+                statusClasses = 'bg-white text-gray-700 hover:bg-gray-100';
+              }
+              
+              // Set icon based on completion, with color matching context
+              if (isCompleted) {
+                const iconColor = isCurrent ? 'text-white' : 'text-green-600';
+                statusIcon = <Icon name="check" className={`h-5 w-5 ${iconColor}`} />;
+              } else {
+                const iconColor = isCurrent ? 'text-white' : 'text-gray-400';
+                statusIcon = <Icon name="code" className={`h-5 w-5 ${iconColor}`} />;
+              }
             }
 
             return (
@@ -42,6 +53,7 @@ const LevelSelector: React.FC<LevelSelectorProps> = ({ levels, userProgress, cur
                   onClick={() => onSelectLevel(index)}
                   disabled={!isUnlocked}
                   className={`w-full flex items-center p-3 rounded-md text-left transition-colors duration-200 ${statusClasses}`}
+                  aria-label={`${level.title} - ${isCompleted ? 'Completed' : isUnlocked ? 'Unlocked' : 'Locked'}`}
                 >
                   <div className="flex-shrink-0 w-6">{statusIcon}</div>
                   <span className="ml-3 font-medium flex-1">{level.id + 1}. {level.title}</span>
